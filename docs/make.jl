@@ -7,15 +7,7 @@ makedocs(
     sitename = "Titan.jl",
     authors = "Damir Akchurin",
     pages = [
-        "Home" => "index.md",
-        "Quick Start" => "QuickStart.md",
-        "Documentation" => [
-            "Model" => "Model.md",
-            "Materials" => "Materials.md",
-            "Sections" => "Sections.md",
-            "Elements" => "Elements.md",
-            "Loads" => "Loads.md"],
-        "Automatic Differentiation" => "AutomaticDifferentiation.md"])
+        "Home" => "index.md"])
 
 deploydocs(
-    repo="github.com/akchurinda/Titan.jl")
+    repo = "github.com/akchurinda/Titan.jl")
