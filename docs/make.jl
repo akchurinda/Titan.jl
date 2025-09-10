@@ -1,5 +1,3 @@
-push!(LOAD_PATH, "../src/")
-
 using Documenter
 using Titan
 
@@ -8,6 +6,3 @@ makedocs(
     authors = "Damir Akchurin",
     pages = [
         "Home" => "index.md"])
-
-deploydocs(
-    repo = "github.com/akchurinda/Titan.jl")
