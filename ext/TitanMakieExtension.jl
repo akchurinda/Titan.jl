@@ -4,10 +4,10 @@ using Titan
 import Titan: plotundeformed, plotundeformed!, plotdeformed, plotdeformed!
 
 Makie.@recipe PlotUndeformed (titan_model, ) begin
-    n_color = :red
+    n_color = :blue
     n_strokecolor = :black
     n_strokewidth = 1
-    n_label_color = :red
+    n_label_color = :blue
     n_label_visible = true
     e_linecolor = :black
     e_linestyle = :solid
@@ -18,10 +18,10 @@ end
 Makie.@recipe PlotDeformed (titan_model, ) begin
     scale = 1
     num_inter_points = 10
-    n_color = :red
+    n_color = :blue
     n_strokecolor = :black
     n_strokewidth = 1
-    n_label_color = :red
+    n_label_color = :blue
     n_label_visible = true
     e_linecolor = :black
     e_linestyle = :dash
@@ -110,8 +110,11 @@ function Makie.plot!(p::PlotDeformed)
         y_l_ip_def = y_l_ip + p.scale[] * u_y_l_i
 
         γ = Γ'[1:2, 1:2]
-        x_g_ip_def = [x_i_def + γ[1, 1] * x + γ[1, 2] * y for (x, y) in zip(x_l_ip_def, y_l_ip_def)]
-        y_g_ip_def = [y_i_def + γ[2, 1] * x + γ[2, 2] * y for (x, y) in zip(x_l_ip_def, y_l_ip_def)]
+        x_g_ip_def = [γ[1, 1] * x + γ[1, 2] * y for (x, y) in zip(x_l_ip_def, y_l_ip_def)]
+        y_g_ip_def = [γ[2, 1] * x + γ[2, 2] * y for (x, y) in zip(x_l_ip_def, y_l_ip_def)]
+
+        x_g_ip_def = x_g_ip_def .- x_g_ip_def[1] .+ x_i_def
+        y_g_ip_def = y_g_ip_def .- y_g_ip_def[1] .+ y_i_def
 
         lines!(p, x_g_ip_def, y_g_ip_def,
             color = p.e_linecolor,

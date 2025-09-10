@@ -31,11 +31,6 @@ function analyze!(model::Model, ::LinearElasticAnalysis)
     R[f_dofs] .= 0
     R[s_dofs] .= R_s
 
-    display(K_e_ff / 200)
-    display(F_f)
-    @show U_f
-    @show R_s
-
     # Update the nodal displacements and reactions:
     for n in model.n
         idx = findfirst(x -> x === n, model.n)
