@@ -1,81 +1,60 @@
 @kwdef struct Model
-    n::Vector{Node    } = Vector{Node    }()
-    m::Vector{Material} = Vector{Material}()
-    s::Vector{Section } = Vector{Section }()
-    e::Vector{Element } = Vector{Element }()
-
-    _n_ids::Vector{Int} = Vector{Int}()
-    _m_ids::Vector{Int} = Vector{Int}()
-    _s_ids::Vector{Int} = Vector{Int}()
-    _e_ids::Vector{Int} = Vector{Int}()
+    n::OrderedDict{Int, Node    } = OrderedDict{Int, Node    }()
+    m::OrderedDict{Int, Material} = OrderedDict{Int, Material}()
+    s::OrderedDict{Int, Section } = OrderedDict{Int, Section }()
+    e::OrderedDict{Int, Element } = OrderedDict{Int, Element }()
 end
 
 function node!(model::Model, id::Int, x::Real, y::Real)
-    if id in model._n_ids
-        throw(ArgumentError("Node with ID $(id) already exists."))
-    else
-        push!(model._n_ids, id)
-    end
+    haskey(model.n, id) && throw(ArgumentError("Node with ID $(id) already exists."))
 
     n = Node(x, y)
-    push!(model.n, n)
+    model.n[id] = n
 
     return model
 end
 
 function material!(model::Model, id::Int, E::Real)
-    if id in model._m_ids
-        throw(ArgumentError("Material with ID $(id) already exists."))
-    else
-        push!(model._m_ids, id)
-    end
+    haskey(model.m, id) && throw(ArgumentError("Material with ID $(id) already exists."))
 
     m = Material(E)
-    push!(model.m, m)
+    model.m[id] = m
 
     return model
 end
 
 function section!(model::Model, id::Int, A::Real, I::Real)
-    if id in model._s_ids
-        throw(ArgumentError("Section with ID $(id) already exists."))
-    else
-        push!(model._s_ids, id)
-    end
+    haskey(model.s, id) && throw(ArgumentError("Section with ID $(id) already exists."))
 
     s = Section(A, I)
-    push!(model.s, s)
+    model.s[id] = s
 
     return model
 end
 
 function element!(model::Model, id::Int, n_i_id::Int, n_j_id::Int, m_id::Int, s_id::Int)
-    if id in model._e_ids
-        throw(ArgumentError("Element with ID $(id) already exists."))
-    else
-        push!(model._e_ids, id)
-    end
+    haskey(model.e, id) && throw(ArgumentError("Element with ID $(id) already exists."))
 
-    n_i_id in model._n_ids || throw(ArgumentError("Node with ID $(node_i_id) does not exist."))
-    n_j_id in model._n_ids || throw(ArgumentError("Node with ID $(node_j_id) does not exist."))
-    m_id   in model._m_ids || throw(ArgumentError("Material with ID $(material_id) does not exist."))
-    s_id   in model._s_ids || throw(ArgumentError("Section with ID $(section_id) does not exist."))
+    haskey(model.n, n_i_id) || throw(ArgumentError("Node with ID $(node_i_id) does not exist."))
+    haskey(model.n, n_j_id) || throw(ArgumentError("Node with ID $(node_j_id) does not exist."))
+    haskey(model.m, m_id  ) || throw(ArgumentError("Material with ID $(material_id) does not exist."))
+    haskey(model.s, s_id  ) || throw(ArgumentError("Section with ID $(section_id) does not exist."))
 
-    n_i = only(model.n[model._n_ids .== n_i_id])
-    n_j = only(model.n[model._n_ids .== n_j_id])
-    m   = only(model.m[model._m_ids .== m_id])
-    s   = only(model.s[model._s_ids .== s_id])
+    n_i = model.n[n_i_id]
+    n_j = model.n[n_j_id]
+    m   = model.m[m_id]
+    s   = model.s[s_id]
 
-    e = Element(n_i, n_j, m, s)
-    push!(model.e, e)
+    e = Element(n_i_id, n_j_id, n_i, n_j, m, s)
+    model.e[id] = e
 
     return model
 end
 
 function support!(model::Model, id::Int, u_x_supp::Bool, u_y_supp::Bool, θ_z_supp::Bool)
-    id in model._n_ids || throw(ArgumentError("Node with ID $(id) does not exist."))
+    haskey(model.n, id) || throw(ArgumentError("Node with ID $(id) does not exist."))
 
-    n = only(model.n[model._n_ids .== id])
+    n = model.n[id]
 
     n.state.supports = @SVector [u_x_supp, u_y_supp, θ_z_supp]
 
@@ -83,9 +62,9 @@ function support!(model::Model, id::Int, u_x_supp::Bool, u_y_supp::Bool, θ_z_su
 end
 
 function cload!(model::Model, id::Int, F_x::Real, F_y::Real, M_z::Real)
-    id in model._n_ids || throw(ArgumentError("Node with ID $(id) does not exist."))
+    haskey(model.n, id) || throw(ArgumentError("Node with ID $(id) does not exist."))
 
-    n = only(model.n[model._n_ids .== id])
+    n = model.n[id]
 
     n.state.f += @SVector [F_x, F_y, M_z]
 
@@ -93,9 +72,9 @@ function cload!(model::Model, id::Int, F_x::Real, F_y::Real, M_z::Real)
 end
 
 function dload!(model::Model, id::Int, q_x::Real, q_y::Real)
-    id in model._e_ids || throw(ArgumentError("Element with ID $(id) does not exist."))
+    haskey(model.e, id) || throw(ArgumentError("Element with ID $(id) does not exist."))
 
-    e = only(model.e[model._e_ids .== id])
+    e = model.e[id]
     L = e.state.L
     Γ = e.state.Γ
 

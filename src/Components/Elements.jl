@@ -1,11 +1,13 @@
 struct Element
+    n_i_id::Int
+    n_j_id::Int
     n_i::Node
     n_j::Node
     m::Material
     s::Section
     state::ElementState
 
-    function Element(n_i::Node, n_j::Node, m::Material, s::Section)
+    function Element(n_i_id::Int, n_j_id::Int, n_i::Node, n_j::Node, m::Material, s::Section)
         x_i, y_i = n_i.x, n_i.y
         x_j, y_j = n_j.x, n_j.y
         E        = m.E
@@ -13,8 +15,8 @@ struct Element
 
         state = ElementState()
 
-        L = compute_L(x_i, y_i, x_j, y_j)
-        Γ = compute_Γ(x_i, y_i, x_j, y_j, L)
+        L     = compute_L(x_i, y_i, x_j, y_j)
+        Γ     = compute_Γ(x_i, y_i, x_j, y_j, L)
         k_e_l = compute_k_e_l(E, A, I, L)
         k_g_l = zero(k_e_l)
         k_e_g = transform_l_to_g(k_e_l, Γ)
@@ -27,7 +29,7 @@ struct Element
         state.k_e_g = k_e_g
         state.k_g_g = k_g_g
 
-        return new(n_i, n_j, m, s, state)
+        return new(n_i_id, n_j_id, n_i, n_j, m, s, state)
     end
 end
 

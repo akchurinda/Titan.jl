@@ -35,10 +35,7 @@ function Makie.plot!(p::PlotUndeformed)
     ns = model.n
     es = model.e
 
-    n_ids = model._n_ids
-    e_ids = model._e_ids
-
-    for (e_id, e) in zip(e_ids, es)
+    for (e_id, e) in es
         n_i = e.n_i
         n_j = e.n_j
 
@@ -57,7 +54,7 @@ function Makie.plot!(p::PlotUndeformed)
         end
     end
 
-    for (n_id, n) in zip(n_ids, ns)
+    for (n_id, n) in ns
         scatter!(p, n.x, n.y, 
             color = p.n_color,
             strokecolor = p.n_strokecolor,
@@ -77,10 +74,7 @@ function Makie.plot!(p::PlotDeformed)
     ns = model.n
     es = model.e
 
-    n_ids = model._n_ids
-    e_ids = model._e_ids
-
-    for (e_id, e) in zip(e_ids, es)
+    for (e_id, e) in es
         n_i = e.n_i
         n_j = e.n_j
 
@@ -128,7 +122,7 @@ function Makie.plot!(p::PlotDeformed)
         end
     end
 
-    for (n_id, n) in zip(n_ids, ns)
+    for (n_id, n) in ns
         u = n.state.u
 
         x_def = n.x + p.scale[] * u[1]

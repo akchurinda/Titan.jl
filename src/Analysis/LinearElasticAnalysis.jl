@@ -32,15 +32,13 @@ function analyze!(model::Model, ::LinearElasticAnalysis)
     R[s_dofs] .= R_s
 
     # Update the nodal displacements and reactions:
-    for n in model.n
-        idx = findfirst(x -> x === n, model.n)
-
+    for (idx, n) in enumerate(values(model.n))
         n.state.u = @SVector [U[3 * idx - 2], U[3 * idx - 1], U[3 * idx]]
         n.state.r = @SVector [R[3 * idx - 2], R[3 * idx - 1], R[3 * idx]]
     end
 
     # Update the element displacements and forces:
-    for e in model.e
+    for e in values(model.e)
         u_g_i = e.n_i.state.u
         u_g_j = e.n_j.state.u
         u_g = vcat(u_g_i, u_g_j)

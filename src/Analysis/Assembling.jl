@@ -1,13 +1,13 @@
 function assemble_K_e(model)
     nn  = length(model.n)
-    T   = promote_type([get_K_e_eltype(e) for e in model.e]...)
+    T   = promote_type([get_K_e_eltype(e) for e in values(model.e)]...)
     K_e = zeros(T, 3 * nn, 3 * nn)
 
-    for e in model.e
+    for e in values(model.e)
         k_e_g = e.state.k_e_g
 
-        idx_i = findfirst(x -> x === e.n_i, model.n)
-        idx_j = findfirst(x -> x === e.n_j, model.n)
+        idx_i = only(findall(keys(model.n) .== e.n_i_id))
+        idx_j = only(findall(keys(model.n) .== e.n_j_id))
 
         @inbounds K_e[(3 * idx_i - 2):(3 * idx_i), (3 * idx_i - 2):(3 * idx_i)] += k_e_g[1:3, 1:3]
         @inbounds K_e[(3 * idx_i - 2):(3 * idx_i), (3 * idx_j - 2):(3 * idx_j)] += k_e_g[1:3, 4:6]
@@ -20,14 +20,14 @@ end
 
 function assemble_K_g(model)
     nn  = length(model.n)
-    T   = promote_type([get_K_g_eltype(e) for e in model.e]...)
+    T   = promote_type([get_K_g_eltype(e) for e in values(model.e)]...)
     K_g = zeros(T, 3 * nn, 3 * nn)
 
-    for e in model.e
+    for e in values(model.e)
         k_g_g = e.state.k_g_g
 
-        idx_i = findfirst(x -> x === e.n_i, model.n)
-        idx_j = findfirst(x -> x === e.n_j, model.n)
+        idx_i = only(findall(keys(model.n) .== e.n_i_id))
+        idx_j = only(findall(keys(model.n) .== e.n_j_id))
 
         @inbounds K_g[(3 * idx_i - 2):(3 * idx_i), (3 * idx_i - 2):(3 * idx_i)] += k_g_g[1:3, 1:3]
         @inbounds K_g[(3 * idx_i - 2):(3 * idx_i), (3 * idx_j - 2):(3 * idx_j)] += k_g_g[1:3, 4:6]
@@ -40,15 +40,15 @@ end
 
 function assemble_F(model)
     nn = length(model.n)
-    T  = promote_type([get_F_eltype(n) for n in model.n]...)
+    T  = promote_type([get_F_eltype(n) for n in values(model.n)]...)
     F  = zeros(T, 3 * nn)
 
-    for (i, n) in enumerate(model.n)
+    for (idx, n) in enumerate(values(model.n))
         f = n.state.f
 
-        @inbounds F[3 * i - 2] = f[1]
-        @inbounds F[3 * i - 1] = f[2]
-        @inbounds F[3 * i    ] = f[3]
+        @inbounds F[3 * idx - 2] = f[1]
+        @inbounds F[3 * idx - 1] = f[2]
+        @inbounds F[3 * idx    ] = f[3]
     end
 
     return F
@@ -59,31 +59,31 @@ function partition_idx(model)
 
     f_dofs = BitVector(undef, 3 * nn)
     s_dots = BitVector(undef, 3 * nn)
-    for (i, n) in enumerate(model.n)
+    for (idx, n) in enumerate(values(model.n))
         supports = n.state.supports
 
         if supports[1]
-            f_dofs[3 * i - 2] = false
-            s_dots[3 * i - 2] = true
+            f_dofs[3 * idx - 2] = false
+            s_dots[3 * idx - 2] = true
         else
-            f_dofs[3 * i - 2] = true
-            s_dots[3 * i - 2] = false
+            f_dofs[3 * idx - 2] = true
+            s_dots[3 * idx - 2] = false
         end
 
         if supports[2]
-            f_dofs[3 * i - 1] = false
-            s_dots[3 * i - 1] = true
+            f_dofs[3 * idx - 1] = false
+            s_dots[3 * idx - 1] = true
         else
-            f_dofs[3 * i - 1] = true
-            s_dots[3 * i - 1] = false
+            f_dofs[3 * idx - 1] = true
+            s_dots[3 * idx - 1] = false
         end
 
         if supports[3]
-            f_dofs[3 * i    ] = false
-            s_dots[3 * i    ] = true
+            f_dofs[3 * idx    ] = false
+            s_dots[3 * idx    ] = true
         else
-            f_dofs[3 * i    ] = true
-            s_dots[3 * i    ] = false
+            f_dofs[3 * idx    ] = true
+            s_dots[3 * idx    ] = false
         end
     end
 
