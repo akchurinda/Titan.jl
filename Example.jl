@@ -24,7 +24,7 @@ support!(model, 4, true, true, true)
 cload!(model, 3, 0, -20, 0)
 dload!(model, 1, 0, -2 / 1000)
 
-analyze!(model, LinearElasticAnalysis())
+analyze!(model, NonlinearElasticAnalysis(LoadControl(0.1), 10, 100, 1E-3))
 
 begin
     F = Figure()

@@ -2,12 +2,11 @@ module Titan
 using StaticArrays
 using LinearAlgebra
 using OrderedCollections
-using StyledStrings
-using Printf
 
 export Model
 export node!, material!, section!, element!, support!, cload!, dload!
-export LinearElasticAnalysis, NonlinearElasticAnalysis
+export LinearElasticAnalysis
+export NonlinearElasticAnalysis, LoadControl
 export analyze!
 export get_node_u, get_node_r, get_element_u_l, get_element_f_l
 export plotundeformed, plotundeformed!, plotdeformed, plotdeformed!

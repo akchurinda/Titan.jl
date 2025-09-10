@@ -22,8 +22,8 @@ struct Element
         k_e_g = transform_l_to_g(k_e_l, Γ)
         k_g_g = zero(k_e_l)
 
-        state.L = L
-        state.Γ = Γ
+        state.L     = L
+        state.Γ     = Γ
         state.k_e_l = k_e_l
         state.k_g_l = k_g_l
         state.k_e_g = k_e_g
