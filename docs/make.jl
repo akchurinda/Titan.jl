@@ -8,7 +8,9 @@ makedocs(
     format = Documenter.HTML(
         prettyurls = get(ENV, "CI", "false") == "true",
         canonical = "https://akchurinda.github.io/Titan.jl"),
-    pages = ["Home" => "index.md"])
+    pages = [
+        "Home" => "index.md",
+        "Tutorial" => "Tutorial.md"])
 
 deploydocs(
     repo = "github.com/akchurinda/Titan.jl.git",

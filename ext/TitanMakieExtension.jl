@@ -4,10 +4,10 @@ using Titan
 import Titan: plotundeformed, plotundeformed!, plotdeformed, plotdeformed!
 
 Makie.@recipe PlotUndeformed (titan_model, ) begin
-    n_color = :blue
+    n_color = :red
     n_strokecolor = :black
     n_strokewidth = 1
-    n_label_color = :blue
+    n_label_color = :red
     n_label_visible = true
     e_linecolor = :black
     e_linestyle = :solid
