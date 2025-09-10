@@ -1,15 +1,4 @@
-abstract type AbstractAnalysis end
-
-struct LinearElasticAnalysis <: AbstractAnalysis
-
-end
-
-struct NonlinearElasticAnalysis <: AbstractAnalysis 
-
-end
-
-struct ElasticBucklingAnalysis  <: AbstractAnalysis end
-struct FreeVibrationAnalysis    <: AbstractAnalysis end
+struct LinearElasticAnalysis <: AbstractAnalysis end
 
 function analyze!(model::Model, ::LinearElasticAnalysis)
     nn = length(model.n)
