@@ -1,24 +1,25 @@
 module Titan
-using OrderedCollections
 using StaticArrays
-using StyledStrings
-using StringDistances
+using LinearAlgebra
+using OrderedCollections
 
-export Node
-export AbstractMaterial, ElasticMaterial, ElasticPerfectlyPlasticMaterial
-export AbstractSection, GeneralSection, RectangularSection, CircularSection, ISection
-export AbstractElement, TrussElement, EulerBernoulliBeamColumnElement, TimoshenkoBeamColumnElement
 export Model
-export node!, material!, section!, element!
-export plotmodel
-export plotmodel!
+export node!, material!, section!, element!, support!, cload!, dload!
+export LinearElasticAnalysis
+export NonlinearElasticAnalysis, LoadControl
+export analyze!
+export get_node_u, get_node_r, get_element_u_l, get_element_f_l
+export plotundeformed, plotundeformed!, plotdeformed, plotdeformed!
 
-include("Nodes.jl")
-include("Materials.jl")
-include("Sections.jl")
-include("Elements.jl")
-include("Model.jl")
-
-include("Utilities/PrettyPrinting.jl")
-include("Utilities/Plotting.jl")
+include("Components/States/NodeStates.jl")
+include("Components/States/ElementStates.jl")
+include("Components/Nodes.jl")
+include("Components/Materials.jl")
+include("Components/Sections.jl")
+include("Components/Elements.jl")
+include("Models.jl")
+include("Analysis/Analysis.jl")
+include("Postprocessing/ExtractingResults.jl")
+include("Postprocessing/PlottingResults.jl")
+include("Utilities.jl")
 end
