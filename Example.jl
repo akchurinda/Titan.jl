@@ -25,9 +25,11 @@ function f(x)
 
     cload!(model, 3, +5000 / sqrt(2), -5000 / sqrt(2), 0)
 
-    U, _ = analyze(model)
+    analyze!(model, LinearElasticAnalysis())
 
-    return U[end - 1]
+    u = get_node_u(model, 3)[2]
+
+    return u
 end
 
 @time ForwardDiff.gradient(f, [0.0, 8000.0, 13000.0, 0.0, 0.0, 0.0])

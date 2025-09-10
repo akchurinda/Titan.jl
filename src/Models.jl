@@ -90,9 +90,7 @@ function support!(model::Model, id::Int, u_x_supp::Bool, u_y_supp::Bool, θ_z_su
 
     n = only(model.n[model._n_ids .== id])
 
-    n.u_x_supp = u_x_supp
-    n.u_y_supp = u_y_supp
-    n.θ_z_supp = θ_z_supp
+    n.state.supports = @SVector [u_x_supp, u_y_supp, θ_z_supp]
 
     return model
 end
@@ -104,9 +102,7 @@ function cload!(model::Model, id::Int, F_x::Real, F_y::Real, M_z::Real)
 
     n = only(model.n[model._n_ids .== id])
 
-    n.F_x += F_x
-    n.F_y += F_y
-    n.M_z += M_z
+    n.state.f += @SVector [F_x, F_y, M_z]
 
     return model
 end
