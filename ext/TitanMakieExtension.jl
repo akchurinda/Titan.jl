@@ -3,35 +3,33 @@ using Makie
 using Titan
 import Titan: plotundeformed, plotundeformed!, plotdeformed, plotdeformed!
 
-Makie.@recipe(PlotUndeformed, titan_model) do scene
-    Makie.Attributes(
-        n_color = :red,
-        e_color = :black,
-        n_strokecolor = :black,
-        n_strokewidth = 1,
-        e_linestyle = :solid,
-        n_label_color = :red,
-        n_label_visible = true,
-        e_label_color = :black,
-        e_label_visible = true)
+Makie.@recipe PlotUndeformed (titan_model, ) begin
+    n_color = :red
+    n_strokecolor = :black
+    n_strokewidth = 1
+    n_label_color = :red
+    n_label_visible = true
+    e_linecolor = :black
+    e_linestyle = :solid
+    e_label_color = :black
+    e_label_visible = true
 end
 
-Makie.@recipe(PlotDeformed, titan_model) do scene
-    Makie.Attributes(
-        scale = 1,
-        num_inter_points = 10,
-        n_color = :red,
-        e_color = :black,
-        n_strokecolor = :black,
-        n_strokewidth = 1,
-        e_linestyle = :dash,
-        n_label_color = :red,
-        n_label_visible = true,
-        e_label_color = :black,
-        e_label_visible = true)
+Makie.@recipe PlotDeformed (titan_model, ) begin
+    scale = 1
+    num_inter_points = 10
+    n_color = :red
+    n_strokecolor = :black
+    n_strokewidth = 1
+    n_label_color = :red
+    n_label_visible = true
+    e_linecolor = :black
+    e_linestyle = :dash
+    e_label_color = :black
+    e_label_visible = true
 end
 
-function Makie.plot!(p::PlotUndeformed{<:Tuple{Model}})
+function Makie.plot!(p::PlotUndeformed)
     model = p.titan_model[]
     
     ns = model.n
@@ -48,7 +46,7 @@ function Makie.plot!(p::PlotUndeformed{<:Tuple{Model}})
         x_j, y_j = n_j.x, n_j.y
 
         lines!(p, [x_i, x_j], [y_i, y_j], 
-            color = p.e_color,
+            color = p.e_linecolor,
             linestyle = p.e_linestyle)
 
         if p.e_label_visible[]
@@ -73,7 +71,7 @@ function Makie.plot!(p::PlotUndeformed{<:Tuple{Model}})
     return p
 end
 
-function Makie.plot!(p::PlotDeformed{<:Tuple{Model}})
+function Makie.plot!(p::PlotDeformed)
     model = p.titan_model[]
     
     ns = model.n
@@ -116,7 +114,7 @@ function Makie.plot!(p::PlotDeformed{<:Tuple{Model}})
         y_g_ip_def = [y_i_def + γ[2, 1] * x + γ[2, 2] * y for (x, y) in zip(x_l_ip_def, y_l_ip_def)]
 
         lines!(p, x_g_ip_def, y_g_ip_def,
-            color = p.e_color,
+            color = p.e_linecolor,
             linestyle = p.e_linestyle)
 
         if p.e_label_visible[]

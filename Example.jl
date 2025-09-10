@@ -65,7 +65,7 @@ begin
     A = Axis(F[1, 1])
 
     plotundeformed!(A, model, label = "Undeformed")
-    plotdeformed!(A, model, scale = 0.5, label = "Deformed")
+    plotdeformed!(A, model, label = "Deformed")
 
     # axislegend(A)
 
