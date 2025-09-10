@@ -46,8 +46,8 @@ function assemble_F(model)
     for (i, n) in enumerate(model.n)
         f = n.state.f
 
-        @inbounds F[3 * i - 1] = f[1]
-        @inbounds F[3 * i - 2] = f[2]
+        @inbounds F[3 * i - 2] = f[1]
+        @inbounds F[3 * i - 1] = f[2]
         @inbounds F[3 * i    ] = f[3]
     end
 

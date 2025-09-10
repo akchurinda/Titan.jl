@@ -27,7 +27,7 @@ function constraint(solver::ArcLengthControl, a, b, c, δu_p, δu_r) end
 function constraint(solver::WorkControl, a, b, c, δu_p, δu_r) end
 
 struct NonlinearElasticAnalysis <: AbstractAnalysis 
-    solver::NonlinearSolver
+    solver::AbstractNonlinearSolver
     max_num_i::Int
     max_num_j::Int
     ϵ::Real

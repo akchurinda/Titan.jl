@@ -7,6 +7,7 @@ export node!, material!, section!, element!, support!, cload!, dload!
 export LinearElasticAnalysis, NonlinearElasticAnalysis
 export analyze!
 export get_node_u, get_node_r, get_element_u_l, get_element_f_l
+export plotundeformed, plotundeformed!, plotdeformed, plotdeformed!
 
 include("States.jl")
 include("Nodes.jl")
@@ -16,6 +17,7 @@ include("Elements.jl")
 include("Models.jl")
 include("Utilities.jl")
 include("Assembling.jl")
-include("Analysis.jl")
+include("Analysis/Analysis.jl")
 include("Postprocessing.jl")
+include("Plotting.jl")
 end
