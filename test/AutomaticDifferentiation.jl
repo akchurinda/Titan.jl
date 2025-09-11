@@ -290,7 +290,7 @@ end
         cload!(model, 11, -H, -V, 0)
 
         # Solve the model using a linear elastic analysis:
-        analyze!(model, NonlinearElasticAnalysis(LoadControl(1 / 100), 100, 100, 1E-6))
+        analyze!(model, NonlinearElasticAnalysis(LoadControl(1 / 10), 10, 10, 1E-6))
 
         # Extract the vertical displacement of free end of the cantilever beam:
         y_max = get_node_u(model, 11)[2]

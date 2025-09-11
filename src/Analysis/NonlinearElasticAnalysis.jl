@@ -30,31 +30,41 @@ function analyze!(model::Model, analysis::NonlinearElasticAnalysis)
     max_num_j = analysis.max_num_j
     ϵ = analysis.ϵ
 
-    # Compute the number of nodes:
-    nn = length(model.n)
+    T_K_e = promote_type([get_K_e_eltype(e) for e in values(model.e)]...)
+    T_K_g = promote_type([get_K_g_eltype(e) for e in values(model.e)]...)
+    T_F   = promote_type([get_F_eltype(n) for n in values(model.n)]...)
+    T     = promote_type(T_K_e, T_K_g, T_F)
 
     # Get the free and supported DOF indices:
     f_dofs, s_dofs = partition_idx(model)
+    n_f_dofs = count(f_dofs)
+    n_s_dofs = count(s_dofs)
+    t_n_dofs = n_f_dofs + n_s_dofs
 
     # Assemble the initial global force vector and partition it:
     F = assemble_F(model)
     F_f = F[f_dofs]
-    F_s = F[s_dofs]
 
-    # Preallocate the reference global force vector at the free DOFs:
     P̄_f = copy(F_f)
 
-    # Preallocate the global force vector at the free DOFs to accumulate the applied loads:
-    P_f = zero(F_f)
-
-    # Preallocate the global residual force vector at the free DOFs:
-    R_f = zero(F_f)
-
-    # Preallocate the global displacement vector at the supported DOFs:
-    δU_s = zero(F_s)
-
-    # Preallocate the global reaction vector at the supported DOFs to accumulate the reactions:
-    δR_f = zero(F_f)
+    P_f    = zeros(T, n_f_dofs)
+    R_f    = zeros(T, n_f_dofs)
+    K_e    = zeros(T, t_n_dofs, t_n_dofs)
+    K_g    = zeros(T, t_n_dofs, t_n_dofs)
+    K_t    = zeros(T, t_n_dofs, t_n_dofs)
+    K_t_ff = zeros(T, n_f_dofs, n_f_dofs)
+    K_t_sf = zeros(T, n_s_dofs, n_f_dofs)
+    δU_s   = zeros(T, n_s_dofs)
+    δR_f   = zeros(T, n_f_dofs)
+    δU_p_f = zeros(T, n_f_dofs)
+    δU_r_f = zeros(T, n_f_dofs)
+    δU_f   = zeros(T, n_f_dofs)
+    δU     = zeros(T, n_f_dofs)
+    δR_f   = zeros(T, n_f_dofs)
+    δR_s   = zeros(T, n_s_dofs)
+    δR     = zeros(T, n_f_dofs)
+    Q_f    = zeros(T, n_f_dofs)
+    Q      = zeros(T, t_n_dofs)
 
     λ = 0
 
@@ -65,38 +75,40 @@ function analyze!(model::Model, analysis::NonlinearElasticAnalysis)
         while j ≤ max_num_j && converged == false
             if j == 1
                 # Assemble the global tangent stiffness matrix:
-                K_e = assemble_K_e(model)
-                K_g = assemble_K_g(model)
-                K_t = K_e + K_g
+                K_e .= assemble_K_e(model)
+                K_g .= assemble_K_g(model)
+                K_t .= K_e + K_g
 
                 # Partition the global tangent stiffness matrix:
-                global K_t_ff, _, K_t_sf, _ = partition(K_t, f_dofs, s_dofs)
+                K_t_ff .= K_t[f_dofs, f_dofs]
+                K_t_sf .= K_t[s_dofs, f_dofs]
 
                 # Compute the displacement increment due to the reference load vector at the free DOFs:
-                global δU_p_f = K_t_ff \ P̄_f
+                δU_p_f .= K_t_ff \ P̄_f
             end
 
             # Compute the displacement increment due to the residual force vector at the free DOFs:
-            δU_r_f = K_t_ff \ R_f
+            δU_r_f .= K_t_ff \ R_f
 
             # Compute the load factor increment:
-            a, b, c = coefficients(solver, nn, f_dofs, j)
-            δλ = constraint(a, b, c, δU_p_f, δU_r_f)
+            if solver isa LoadControl
+                δλ = j == 1 ? solver.Δλ : 0
+            end
             
             # Compute the displacement increment at the free DOFs:
             λ += δλ
 
             # Update the global force vector at the free DOFs:
-            P_f += δλ * P̄_f
+            P_f .+= δλ * P̄_f
 
             # Update the global displacement vector at the free DOFs:
-            δU_f = δλ * δU_p_f + δU_r_f
+            δU_f .= δλ .* δU_p_f .+ δU_r_f
 
             # Assemble the full global displacement vector:
             δU = departition(δU_f, δU_s, f_dofs, s_dofs)
 
             # Compute the reaction vector incerement at the supported DOFs:
-            δR_s = K_t_sf * δU_f
+            δR_s .= K_t_sf * δU_f
 
             # Assemble the full global reaction vector increment:
             δR = departition(δR_f, δR_s, f_dofs, s_dofs)
@@ -136,7 +148,7 @@ function analyze!(model::Model, analysis::NonlinearElasticAnalysis)
             end
 
             # Compute the global internal force vector:
-            Q = zeros(promote_type([eltype(e.state.f_l) for e in values(model.e)]...), 3 * nn)
+            Q .= 0
             for e in values(model.e)
                 idx_i = only(findall(keys(model.n) .== e.n_i_id))
                 idx_j = only(findall(keys(model.n) .== e.n_j_id))
@@ -149,10 +161,10 @@ function analyze!(model::Model, analysis::NonlinearElasticAnalysis)
             end
 
             # Partition the global internal force vector:
-            Q_f = Q[f_dofs]
+            Q_f .= Q[f_dofs]
 
             # Compute the global residual force vector at the free DOFs:
-            R_f = P_f - Q_f
+            R_f .= P_f .- Q_f
 
             # Check for convergence:
             if norm(R_f) / norm(P_f) < ϵ
